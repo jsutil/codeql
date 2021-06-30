@@ -43,7 +43,7 @@ class SpringUrlRedirectFlowConfig extends TaintTracking::Configuration {
     // E.g: `String url = "/path?token=" + request.getParameter("token");`
     // Note this is quite a broad sanitizer (it will also sanitize the right-hand side of `url = "http://" + request.getParameter("token")`);
     // Consider making this stricter in future.
-    exists(AddExpr ae |
+    exists(ReturnedStringConcatExpr ae |
       ae.getRightOperand() = node.asExpr() and
       not ae instanceof RedirectBuilderExpr
     )
@@ -64,3 +64,4 @@ from DataFlow::PathNode source, DataFlow::PathNode sink, SpringUrlRedirectFlowCo
 where conf.hasFlowPath(source, sink)
 select sink.getNode(), source, sink, "Potentially untrusted URL redirection due to $@.",
   source.getNode(), "user-provided value"
+

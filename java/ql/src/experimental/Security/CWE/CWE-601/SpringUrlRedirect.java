@@ -1,3 +1,5 @@
+import java.util.logging.Logger;
+
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +10,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class SpringUrlRedirect {
 
     private final static String VALID_REDIRECT = "http://127.0.0.1";
+    private Logger logger = Logger.getLogger(SpringUrlRedirect.class.getName());
 
     @GetMapping("url1")
     public RedirectView bad1(String redirectUrl, HttpServletResponse response) throws Exception {
@@ -34,6 +37,20 @@ public class SpringUrlRedirect {
     }
 
     @GetMapping("url5")
+    public String bad5(String redirectUrl) {
+        logger.info("redirecting to " + redirectUrl);
+        String url = "redirect:" + redirectUrl;
+        return url;
+    }
+
+    @GetMapping("url6")
+    public String bad6(String path) {
+        // a payload such as %2fsome.domain still results in an open redirect
+        logger.info("redirecting to /" + path);
+        return "redirect:/" + path;
+    }
+
+    @GetMapping("url7")
     public RedirectView good1(String redirectUrl) {
         RedirectView rv = new RedirectView();
         if (redirectUrl.startsWith(VALID_REDIRECT)){

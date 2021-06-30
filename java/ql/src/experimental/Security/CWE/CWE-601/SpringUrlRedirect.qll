@@ -13,7 +13,15 @@ import semmle.code.java.frameworks.spring.SpringController
 class RedirectBuilderExpr extends AddExpr {
   RedirectBuilderExpr() {
     this.getLeftOperand().(CompileTimeConstantExpr).getStringValue() in [
-        "redirect:", "ajaxredirect:", "forward:"
+      "redirect://", 
+      "ajaxredirect://", 
+      "forward://", 
+      "redirect:/",
+      "ajaxredirect:/", 
+      "forward:/", 
+      "redirect:", 
+      "ajaxredirect:", 
+      "forward:"
       ]
   }
 }
@@ -29,7 +37,15 @@ class RedirectAppendCall extends MethodAccess {
     this.getMethod().hasName("append") and
     this.getMethod().getDeclaringType() instanceof StringBuildingType and
     this.getArgument(0).(CompileTimeConstantExpr).getStringValue() in [
-        "redirect:", "ajaxredirect:", "forward:"
+        "redirect://", 
+        "ajaxredirect://", 
+        "forward://", 
+        "redirect:/", 
+        "ajaxredirect:/", 
+        "forward:/", 
+        "redirect:", 
+        "ajaxredirect:", 
+        "forward:"
       ]
   }
 }
@@ -69,5 +85,21 @@ class SpringUrlRedirectSink extends DataFlow::Node {
         rbe = cie.getArgument(0) and rbe.getRightOperand() = this.asExpr()
       )
     )
+  }
+}
+
+/** 
+ * A string concatenation expression which is returned by a method either directly
+ * or indirectly, through a local variable assignment and subsequent access
+ */
+class ReturnedStringConcatExpr extends AddExpr {
+  ReturnedStringConcatExpr() {
+      exists(ReturnStmt rs |
+          this.getLeftOperand().getType() instanceof TypeString and
+          (
+            rs.getResult() = this or
+            this.getParent().(VariableAssign).getDestVar() = rs.getResult().(VarAccess).getVariable()
+          )
+      )
   }
 }
