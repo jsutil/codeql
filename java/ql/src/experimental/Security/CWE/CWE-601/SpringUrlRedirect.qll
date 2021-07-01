@@ -89,17 +89,13 @@ class SpringUrlRedirectSink extends DataFlow::Node {
 }
 
 /** 
- * A string concatenation expression which is returned by a method either directly
- * or indirectly, through a local variable assignment and subsequent access
+ * A string concatenation expression that is returned by a method
  */
 class ReturnedStringConcatExpr extends AddExpr {
   ReturnedStringConcatExpr() {
       exists(ReturnStmt rs |
-          this.getLeftOperand().getType() instanceof TypeString and
-          (
-            rs.getResult() = this or
-            this.getParent().(VariableAssign).getDestVar() = rs.getResult().(VarAccess).getVariable()
-          )
+        this.getLeftOperand().getType() instanceof TypeString and
+        rs.getResult() = this
       )
   }
 }

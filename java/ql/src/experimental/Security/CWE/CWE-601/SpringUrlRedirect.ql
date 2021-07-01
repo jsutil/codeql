@@ -38,6 +38,14 @@ class SpringUrlRedirectFlowConfig extends TaintTracking::Configuration {
     guard instanceof StartsWithSanitizer
   }
 
+  override predicate isAdditionalTaintStep(DataFlow::Node source, DataFlow::Node sink) {
+    source.asExpr() instanceof AddExpr and
+    exists(VariableAssign va |
+      va.getSource() = source.asExpr() and
+      sink.asParameter() = va.getDestVar()
+    )
+  }
+
   override predicate isSanitizer(DataFlow::Node node) {
     // Exclude the case where the left side of the concatenated string is not `redirect:`.
     // E.g: `String url = "/path?token=" + request.getParameter("token");`
